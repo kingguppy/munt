@@ -16,6 +16,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "fmath.h"
 #include <math.h>
 
 #include "mt32emu.h"
@@ -252,6 +253,16 @@ void Tables::initMT32ConstantTables(Synth *synth) {
 		myRand = (int)((myRand - RAND_MAX / 2) / (float)RAND_MAX * (7168 / 2));
 		//FIXME:KG: Original ultimately set the lowest two bits to 0, for no obvious reason
 		noiseBuf[i] = (Bit16s)myRand;
+	}
+
+	// init my tables
+	for (int i = 0; i < 65536; i++) {
+		tPitch2Freq[i] = fpow2(i / 4096.0f - 1.034215715f);
+		tPitch2RFreq[i] = fpow2(1.034215715f - i / 4096.0f);
+	}
+
+	for (int i = 0; i < 256; i++) {
+		tCutoffFreq[i] = fpow2(8.f * (((float)i / 128.0f) - 1.f));
 	}
 }
 

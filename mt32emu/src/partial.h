@@ -53,11 +53,10 @@ private:
 
 	bool firstSample;
 
-	Bit16s myBuffer[MAX_SAMPLE_OUTPUT];
+	// variables for fast bandlimited Synth
+	float SynthPulseCounter;
 
-	// Keyfollowed note value
-	BlitSaw *posSaw;
-	BlitSaw *negSaw;
+	Bit16s myBuffer[MAX_SAMPLE_OUTPUT];
 
 	const KeyLookup *keyLookup; // LUTs for the clamped (12..108) key
 

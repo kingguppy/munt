@@ -15,7 +15,7 @@
  */
 
 #include <string.h>
-#include <math.h>
+//#include <math.h>
 
 #include "mt32emu.h"
 
@@ -60,6 +60,8 @@ Part::Part(Synth *useSynth, unsigned int usePartNum) {
 	currentInstr[10] = 0;
 	expression = 100;
 	activePartialCount = 0;
+	pitchBend = 0;
+	modulation = 0;
 	memset(patchCache, 0, sizeof(patchCache));
 	for (int i = 0; i < MT32EMU_MAX_POLY; i++) {
 		freePolys.push_front(new Poly(this));

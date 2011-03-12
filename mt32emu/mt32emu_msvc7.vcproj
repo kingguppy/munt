@@ -1,95 +1,157 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="9,00"
 	Name="mt32emu"
 	ProjectGUID="{063A149D-E48C-499B-B13F-7A70C140A662}"
-	Keyword="Win32Proj">
+	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="Debug"
 			IntermediateDirectory="Debug"
 			ConfigurationType="4"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="..\SDL\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
-				MinimalRebuild="TRUE"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="4"/>
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/mt32emu.lib"/>
+				OutputFile="$(OutDir)/mt32emu.lib"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="Release"
 			IntermediateDirectory="Release"
 			ConfigurationType="4"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="C:\munt\mt32emu\src;C:\munt\mt32emu\src\blit"
+				Optimization="3"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
+				EnableFiberSafeOptimizations="false"
+				WholeProgramOptimization="true"
+				AdditionalIncludeDirectories="..\SDL\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
+				BufferSecurityCheck="false"
+				EnableEnhancedInstructionSet="2"
+				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				AssemblerOutput="4"
 				WarningLevel="4"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"/>
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/mt32emu.lib"/>
+				OutputFile="$(OutDir)/mt32emu.lib"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -98,134 +160,136 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
 			<File
-				RelativePath=".\src\externalInterface.cpp">
+				RelativePath=".\src\delayReverb.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\file.cpp">
+				RelativePath=".\src\externalInterface.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\i386.cpp">
+				RelativePath=".\src\file.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\part.cpp">
+				RelativePath=".\src\part.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\partial.cpp">
+				RelativePath=".\src\partial.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\partialManager.cpp">
+				RelativePath=".\src\partialManager.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\synth.cpp">
+				RelativePath=".\src\poly.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\tables.cpp">
+				RelativePath=".\src\synth.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\tables.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\tva.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\tvf.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\tvp.cpp"
+				>
 			</File>
 			<Filter
 				Name="freeverb"
-				Filter="">
+				>
 				<File
-					RelativePath=".\src\freeverb\allpass.cpp">
+					RelativePath=".\src\freeverb\allpass.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\freeverb\comb.cpp">
+					RelativePath=".\src\freeverb\comb.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\freeverb\revmodel.cpp">
-				</File>
-			</Filter>
-			<Filter
-				Name="blit"
-				Filter="">
-				<File
-					RelativePath=".\src\blit\Blit.cpp">
-				</File>
-				<File
-					RelativePath=".\src\blit\BlitSaw.cpp">
-				</File>
-				<File
-					RelativePath=".\src\blit\BlitSquare.cpp">
-				</File>
-				<File
-					RelativePath=".\src\blit\Generator.cpp">
-				</File>
-				<File
-					RelativePath=".\src\blit\Stk.cpp">
+					RelativePath=".\src\freeverb\revmodel.cpp"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
 			<File
-				RelativePath=".\src\externalInterface.h">
+				RelativePath=".\src\externalInterface.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\file.h">
+				RelativePath=".\src\file.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\i386.h">
+				RelativePath=".\src\mt32emu.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\mt32emu.h">
+				RelativePath=".\src\part.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\part.h">
+				RelativePath=".\src\partial.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\partial.h">
+				RelativePath=".\src\partialManager.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\partialManager.h">
+				RelativePath=".\src\structures.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\structures.h">
+				RelativePath=".\src\synth.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\synth.h">
-			</File>
-			<File
-				RelativePath=".\src\tables.h">
+				RelativePath=".\src\tables.h"
+				>
 			</File>
 			<Filter
 				Name="freeverb"
-				Filter="">
+				>
 				<File
-					RelativePath=".\src\freeverb\allpass.h">
+					RelativePath=".\src\freeverb\allpass.h"
+					>
 				</File>
 				<File
-					RelativePath=".\src\freeverb\comb.h">
+					RelativePath=".\src\freeverb\comb.h"
+					>
 				</File>
 				<File
-					RelativePath=".\src\freeverb\denormals.h">
+					RelativePath=".\src\freeverb\denormals.h"
+					>
 				</File>
 				<File
-					RelativePath=".\src\freeverb\revmodel.h">
+					RelativePath=".\src\freeverb\revmodel.h"
+					>
 				</File>
 				<File
-					RelativePath=".\src\freeverb\tuning.h">
-				</File>
-			</Filter>
-			<Filter
-				Name="blit"
-				Filter="">
-				<File
-					RelativePath=".\src\blit\Blit.h">
-				</File>
-				<File
-					RelativePath=".\src\blit\BlitSaw.h">
-				</File>
-				<File
-					RelativePath=".\src\blit\BlitSquare.h">
-				</File>
-				<File
-					RelativePath=".\src\blit\Generator.h">
-				</File>
-				<File
-					RelativePath=".\src\blit\Stk.h">
+					RelativePath=".\src\freeverb\tuning.h"
+					>
 				</File>
 			</Filter>
 		</Filter>

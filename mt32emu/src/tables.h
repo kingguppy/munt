@@ -17,9 +17,6 @@
 #ifndef MT32EMU_TABLES_H
 #define MT32EMU_TABLES_H
 
-#include "blit/BlitSaw.h"
-#include "blit/BlitSquare.h"
-
 namespace MT32Emu {
 
 // Mathematical constants
@@ -39,7 +36,9 @@ const int FILTERGRAN = 16000;
 // FIXME: This value is the amplitude possible whilst avoiding
 // overdriven values immediately after filtering when playing
 // back SQ3MT.MID. Needs to be checked.
-const int WGAMP = 12382;
+//const int WGAMP = 12382;
+//const int WGAMP = 12288; // = 16384 - 4096 m.b.
+const int WGAMP = 16384;
 
 const int MIDDLEC = 60;
 const int MIDDLEA = 69; // By this I mean "A above middle C"
@@ -100,6 +99,11 @@ public:
 	Bit32s pwVelfollowAdd[15][128];
 	float resonanceFactor[31];
 	float pwFactorf[101];
+
+	// my tables
+	float tPitch2Freq[65536];
+	float tPitch2RFreq[65536];
+	float tCutoffFreq[256];
 
 	// LUTs varying with sample rate
 	Bit32u envTime[101];

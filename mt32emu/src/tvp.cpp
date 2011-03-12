@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <math.h>
+//#include <math.h>
 #include <stdlib.h>
 
 #include "mt32emu.h"
@@ -88,7 +88,7 @@ static Bit32u calcBasePitch(const Partial *partial, const TimbreParam::PartialPa
 		} else {
 			// Sawtooth waves are effectively double the frequency of square waves.
 			// Thus we add 4096 less than for square waves here, which results in halving the frequency.
-			basePitch += 33037;
+			basePitch += 37133; // 33037;
 		}
 	}
 	if (basePitch < 0) {

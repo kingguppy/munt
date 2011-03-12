@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <math.h>
+#include "fmath.h"
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -325,7 +325,8 @@ bool Synth::loadPCMROM(const char *filename) {
 		testval = (float)((~e) & 0x7fff);
 		testval = -(testval / 400.00f);
 		//testval = -(testval / 341.32291666666666666666666666667);
-		float vol = powf(8, testval / 20) * 32767.0f;
+//		float vol = powf(8, testval / 20) * 32767.0f;
+		float vol = fpow2(3 * testval / 20) * 32767.0f;
 
 		if (e > 0)
 			vol = -vol;
@@ -351,7 +352,7 @@ bool Synth::initPCMList(Bit16u mapAddress, Bit16u count) {
 		Bit16u rTuneOffset = (tps[i].pitchMSB << 8) | tps[i].pitchLSB;
 		// The number below is confirmed to a reasonable degree of accuracy on CM-32L
 		double STANDARDFREQ = 442.0;
-		float rTune = (float)(STANDARDFREQ * pow(2.0, (0x5000 - rTuneOffset) / 4056.0 - 9.0 / 12.0));
+		float rTune = (float)(STANDARDFREQ * fpow2((0x5000 - rTuneOffset) / 4056.0 - 9.0 / 12.0));
 		//printDebug("%f,%d,%d", pTune, tps[i].pitchCoarse, tps[i].pitchFine);
 		if (rAddr + rLen > pcmROMSize) {
 			printDebug("Control ROM error: Wave map entry %d points to invalid PCM address 0x%04X, length 0x%04X", i, rAddr, rLen);
@@ -416,7 +417,6 @@ bool Synth::initTimbres(Bit16u mapAddress, Bit16u offset, int count, int startTi
 bool Synth::open(SynthProperties &useProp) {
 	if (isOpen)
 		return false;
-	Stk::setSampleRate(useProp.sampleRate);
 	reverbModel->reset();
 	reverbModel->setSampleRate(useProp.sampleRate);
 	delayReverbModel->reset();
@@ -1072,7 +1072,7 @@ bool Synth::refreshSystem() {
 	//FIXME:KG: This is just an educated guess.
 	// The LAPC-I documentation claims a range of 427.5Hz-452.6Hz (similar to what we have here)
 	// The MT-32 documentation claims a range of 432.1Hz-457.6Hz
-	masterTune = 440.0f * powf(2.0f, (mt32ram.system.masterTune - 64.0f) / (128.0f * 12.0f));
+	masterTune = 440.0f * fpow2((mt32ram.system.masterTune - 64.0f) / (128.0f * 12.0f));
 	printDebug(" Master Tune: %f", masterTune);
 	printDebug(" Reverb: mode=%d, time=%d, level=%d", mt32ram.system.reverbMode, mt32ram.system.reverbTime, mt32ram.system.reverbLevel);
 	report(ReportType_newReverbMode,  &mt32ram.system.reverbMode);

@@ -16,7 +16,7 @@
 
 #include "mt32emu.h"
 
-#include <math.h>
+#include "fmath.h"
 
 namespace MT32Emu {
 
@@ -63,7 +63,8 @@ void TVA::setAmpIncrement(Bit8u ampIncrement) {
 
 	largeAmpInc = ampIncrement & 0x7F;
 	// FIXME: We could use a table for this in future
-	largeAmpInc = (unsigned int)((powf(10.0f, (float)((largeAmpInc - 1.0f) / 26.0f))) * 256.0f);
+//	largeAmpInc = (unsigned int)((powf(10.0f, (float)((largeAmpInc - 1.0f) / 26.0f))) * 256.0f);
+	largeAmpInc = (unsigned int)((fpow2(3.321928095f * (float)((largeAmpInc - 1.0f) / 26.0f))) * 256.0f);
 }
 
 float TVA::nextAmp() {
@@ -100,7 +101,11 @@ float TVA::nextAmp() {
 	}
 	// FIXME:KG: Note that the "65536.0f" here is slightly arbitrary, and needs to be confirmed. 32768.0f is more likely.
 	// FIXME:KG: We should perhaps use something faster once we've got the details sorted out, but the real synth's amp level changes pretty smoothly.
-	return powf(2.0f, (float)currentAmp / TVA_TARGET_AMP_MULT / 16.0f - 1.0f) / 65536.0f;
+	return fpow2((float)currentAmp / TVA_TARGET_AMP_MULT / 16.0f - 16.0f);
+}
+
+int TVA::getPhase() {
+	return (targetPhase);
 }
 
 static int multBias(const Tables *tables, Bit8u biasLevel, int bias) {
@@ -148,7 +153,8 @@ static int calcBasicAmp(const Tables *tables, const Partial *partial, const MemP
 	int amp = 155;
 
 	if (!partial->isRingModulatingSlave()) {
-		amp -= tables->masterVolToAmpSubtraction[system->masterVol];
+//		amp -= tables->masterVolToAmpSubtraction[system->masterVol];
+		amp = 55 + system->masterVol;	// better correspond to volume changes
 		if (amp < 0)
 			return 0;
 		amp -= tables->levelToAmpSubtraction[patchTemp->outputLevel];

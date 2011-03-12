@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include "fmath.h"
 
 #include "mt32emu.h"
 
@@ -33,15 +34,9 @@ Partial::Partial(Synth *useSynth, int debugPartialNum) :
 	ownerPart = -1;
 	poly = NULL;
 	pair = NULL;
-	// BlitSaws are initialised with dummy values here - they'll be reset the first time they're used anyway.
-	// We're not allocating lazily since deferring memory allocations until sound is actually playing doesn't seem like a good idea.
-	posSaw = new BlitSaw(1, 0.5);
-	negSaw = new BlitSaw(1, 0.0);
 }
 
 Partial::~Partial() {
-	delete posSaw;
-	delete negSaw;
 	delete tva;
 	delete tvp;
 }
@@ -147,6 +142,7 @@ void Partial::startPartial(const Part *part, Poly *usePoly, const PatchCache *us
 		pcmWave = &synth->pcmWaves[pcmNum];
 	} else {
 		pcmWave = NULL;
+		SynthPulseCounter = 0.f;
 	}
 
 	pastCarrier = 0;
@@ -206,7 +202,7 @@ unsigned long Partial::generateSamples(Bit16s *partialBuf, unsigned long length)
 
 	// Generate samples
 
-	unsigned long sampleNum;
+	unsigned long sampleNum = 0;
 	for(sampleNum = 0; sampleNum < length; sampleNum++) {
 		float sample = 0;
 		float amp = tva->nextAmp();
@@ -218,7 +214,8 @@ unsigned long Partial::generateSamples(Bit16s *partialBuf, unsigned long length)
 		Bit16u pitch = tvp->nextPitch();
 
 		// Aka (slightly slower): powf(2.0f, pitchVal / 4096.0f - 16.0f) * 32000.0f
-		float freq = powf(2.0f, pitch / 4096.0f - 1.034215715f);
+//		float freq = fpow2(pitch / 4096.0f - 1.034215715f);
+		float freq = synth->tables.tPitch2Freq[pitch];
 
 		if (patchCache->PCMPartial) {
 			// Render PCM waveform
@@ -234,79 +231,64 @@ unsigned long Partial::generateSamples(Bit16s *partialBuf, unsigned long length)
 			float newPCMPosition = pcmPosition + positionDelta;
 			int newIntPCMPosition = (int)newPCMPosition;
 
-			if (amp != 0.0f) {
-				// Only bother doing the actual sample calculation if someone's going to hear it.
-				if (positionDelta < 1.0f) {
-					// Linear interpolation
-					int firstSample = synth->pcmROMData[pcmAddr + intPCMPosition];
-					int nextSample = getPCMSample(intPCMPosition + 1);
-					sample = firstSample + (nextSample - firstSample) * (pcmPosition - intPCMPosition);
-				} else if (intPCMPosition == newIntPCMPosition) {
-					// Small optimisation
-					sample = synth->pcmROMData[pcmAddr + newIntPCMPosition];
-				} else {
-					// Average all the samples in the range
-					double sampleSum = synth->pcmROMData[pcmAddr + intPCMPosition] * ((intPCMPosition + 1) - pcmPosition); // First sample may not be 100% in range
-					for (int position = intPCMPosition + 1; position < newIntPCMPosition; position++) {
-						sampleSum += getPCMSample(position);
-					}
-					sampleSum += getPCMSample(newIntPCMPosition) * (newPCMPosition - newIntPCMPosition); // Last sample may not be 100% in range
-					sample = (float)(sampleSum / positionDelta);
-				}
-			} else {
-				// If a sample is calculated in the woods, and the current TVA value's too low to hear it, is there any point?
-				sample = 0.0f;
-			}
+			// Linear interpolation
+			int firstSample = synth->pcmROMData[pcmAddr + intPCMPosition];
+			int nextSample = getPCMSample(intPCMPosition + 1);
+			sample = firstSample + (nextSample - firstSample) * (pcmPosition - intPCMPosition);
+			// Small optimisation
+//			sample = synth->pcmROMData[pcmAddr + intPCMPosition];
 			if (pcmWave->loop) {
-				newPCMPosition = fmodf(newPCMPosition, pcmWave->len);
+				newPCMPosition -= pcmWave->len * int(newPCMPosition / pcmWave->len);
 				newIntPCMPosition = newIntPCMPosition % pcmWave->len;
 			}
 			pcmPosition = newPCMPosition;
 			intPCMPosition = newIntPCMPosition;
 		} else {
 			// Render synthesised waveform
-			if(firstSample) {
-				firstSample = false;
-				float spw = synth->tables.pwFactorf[pulsewidth];
-				if ((patchCache->waveform & 1) != 0 && spw < 0.5f) {
-					spw = 0.5f - ((0.5f - spw) * 2.0f);
+//	 blit code replaced with a fast band-limited synth
+			float SynthDelta = synth->myProp.sampleRate * synth->tables.tPitch2RFreq[pitch];
+			float SynthPulseDelta = SynthDelta * (1.f - .0093f * pulsewidth);
+			if ((patchCache->waveform & 1) != 0) {
+				//Sawtooth samples
+				if ((SynthPulseDelta - SynthPulseCounter) >= 1.f) {
+					sample = float(2 * WGAMP) * SynthPulseCounter / SynthPulseDelta - float(WGAMP);
+				} else if ((SynthPulseDelta - SynthPulseCounter) > 0.f) {
+					sample = float(2 * WGAMP) * (SynthPulseDelta - SynthPulseCounter) - float(WGAMP);
+				} else {
+					sample = -float(WGAMP);
 				}
-				posSaw->reset(freq, spw);
-				negSaw->reset(freq, 0.0);
 			} else {
-				posSaw->setFrequency(freq);
-				negSaw->setFrequency(freq);
+				//Square wave.
+				SynthPulseDelta *= .5f;
+				if ((SynthPulseDelta - SynthPulseCounter) >= 1.f) {
+					sample = -float(WGAMP);
+				} else if ((SynthPulseDelta - SynthPulseCounter) > 0.f) {
+					sample = float(2 * WGAMP) * (1.f + SynthPulseCounter - SynthPulseDelta) - float(WGAMP);
+				} else if ((SynthDelta - SynthPulseCounter) >= 1.f) {
+					sample = float(WGAMP);
+				} else {
+					sample = float(2 * WGAMP) * (SynthDelta - SynthPulseCounter) - float(WGAMP);
+				}
 			}
+			SynthPulseCounter++;
+			if (SynthPulseCounter > SynthDelta) {
+				SynthPulseCounter -= SynthDelta;
+			}
+
 			Bit32s filtval = getFiltEnvelope();
-
-			float phase = negSaw->getPhase();
-
-			sample = posSaw->tick() - negSaw->tick();
-			float freqsum = 0;
-			freqsum = ((powf(256.0f, (((float)filtval / 128.0f) - 1.0f))) * posSaw->getStartFreq());
+			float freqsum = synth->tables.tCutoffFreq[filtval] * freq;
 			if(freqsum >= (FILTERGRAN - 500.0))
 				freqsum = (FILTERGRAN - 500.0f);
-			filtval = (Bit32s)freqsum;
+			sample = (floorf((synth->iirFilter)((sample), &history[0], synth->tables.filtCoeff[(Bit32s)freqsum][(int)patchCache->filtEnv.resonance])));
 
-			sample = (floorf((synth->iirFilter)((sample * WGAMP), &history[0], synth->tables.filtCoeff[filtval][(int)patchCache->filtEnv.resonance])));
-
-			if ((patchCache->waveform & 1) != 0) {
-				//CC: Sawtooth samples are finally generated here by multipling an in-sync cosine
-				//with the generated square wave.
-
-				//CC: Computers are fast these days.  Not caring to use a LUT or fixed point anymore.
-				//If I port this to the iPhone I may reconsider.
-				sample = ((cosf(phase * 2.0f)) * sample) + (WGAMP * 0.1618f);
+			// This amplifies signal fading near the cutoff point
+			if (filtval < 128) {
+				sample *= .125f * (128 + 8 - filtval);
 			}
 
-			if (sample < -32768.0f) {
-				synth->printDebug("Overdriven amplitude for waveform=%d, freqsum=%f: %f < -32768", patchCache->waveform, freqsum, sample);
-				sample = -32768.0f;
-			}
-			else if (sample > 32767.0f) {
-				synth->printDebug("Overdriven amplitude for waveform=%d, freqsum=%f: %f > 32767", patchCache->waveform, freqsum, sample);
-				sample = 32767.0f;
-			}
+			// In case of overdriving prevent clicks
+			if (sample > 32767.f) sample = 32767.f;
+			if (sample < -32768.f) sample = -32768.f;
 			filtEnv.envpos++;
 		}
 
@@ -347,23 +329,12 @@ Bit16s *Partial::mixBuffersRingMix(Bit16s *buf1, Bit16s *buf2, unsigned long len
 		return NULL;
 	if (buf2 == NULL) {
 		return buf1;
-		// FIXME:KG: Not sure what the reason for this was, but hopefully it's obsolete
-/*
-		Bit16s *outBuf = buf1;
-		while (len--) {
-			if (*buf1 < -8192)
-				*buf1 = -8192;
-			else if (*buf1 > 8192)
-				*buf1 = 8192;
-			buf1++;
-		}
-		return outBuf;
-*/
 	}
 
 	Bit16s *outBuf = buf1;
 	while (len--) {
-		Bit32s result = calcRingMod(*buf1, *buf2) + *buf1;
+//		Bit32s result = calcRingMod(*buf1 >> 1, *buf2 >> 1) + *buf1;
+		Bit32s result = ((*buf1 * *buf2) >> 16) + *buf1;
 
 		if (result > 32767)
 			result = 32767;
@@ -386,7 +357,8 @@ Bit16s *Partial::mixBuffersRing(Bit16s *buf1, Bit16s *buf2, unsigned long len) {
 
 	Bit16s *outBuf = buf1;
 	while (len--) {
-		Bit32s result = calcRingMod(*buf1, *buf2);
+//		Bit32s result = calcRingMod(*buf1, *buf2);
+		Bit32s result = (*buf1 * *buf2) >> 16;
 
 		if (result > 32767)
 			result = 32767;
@@ -439,11 +411,11 @@ bool Partial::produceOutput(Bit16s *partialBuf, unsigned long length) {
 			pairNumGenerated = 0;
 		} else {
 			pairBuf = &pair->myBuffer[0];
-			pairNumGenerated = generateSamples(pairBuf, numGenerated);
+			pairNumGenerated = pair->generateSamples(pairBuf, numGenerated);
 			if (!isActive()) {
 				pair->deactivate();
 				pair = NULL;
-			} else if (!pair->isActive()) {
+			} else if (pair != NULL && !pair->isActive()) {
 				pair = NULL;
 			}
 		}

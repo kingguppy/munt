@@ -23,7 +23,7 @@
 // Shows number of partials MT-32 is playing, and on which parts
 #define MT32EMU_MONITOR_PARTIALS 0
 
-#define MT32EMU_USE_EXTINT 0
+#define MT32EMU_USE_EXTINT 01
 
 // Configuration
 // The maximum number of partials playing simultaneously

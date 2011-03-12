@@ -45,6 +45,7 @@ private:
 	void nextPhase();
 
 public:
+
 	// FIXME: This should probably have a getter
 	bool play;
 
@@ -53,6 +54,7 @@ public:
 	float nextAmp();
 	void recalcSustain();
 	void startDecay();
+	int getPhase();
 };
 
 }

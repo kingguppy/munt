@@ -60,7 +60,7 @@ void ExternalInterface::doControlPanelComm(Synth *synth, int sndBufLength) {
 					*bufptr++ = (Bit16u)reqType;
 					*bufptr++ = (Bit16u)MT32EMU_MAX_PARTIALS;
 					for (i=0;i<MT32EMU_MAX_PARTIALS;i++) {
-						if (!synth->getPartial(i)->play) {
+						if (!synth->getPartial(i)->isActive()) {
 							*bufptr++ = 0;
 							*bufptr++ = 0;
 							*bufptr++ = 0;
@@ -69,13 +69,18 @@ void ExternalInterface::doControlPanelComm(Synth *synth, int sndBufLength) {
 							*bufptr++ = 0;
 							*bufptr++ = 0;
 						} else {
-							if (synth->getPartial(i)->envs[EnvelopeType_amp].decaying) {
-								*bufptr++ = 3;
+							int phase = synth->getPartial(i)->tva->getPhase();
+							if (phase == 7) {
+								*bufptr++ = 0;
 							} else {
-								if (synth->getPartial(i)->envs[EnvelopeType_amp].envstat == 4) {
-									*bufptr++ = 2;
-								} else {
+								if (phase < 3) {
 									*bufptr++ = 1;
+								} else {
+									if (phase == 6) {
+										*bufptr++ = 3;
+									} else {
+										*bufptr++ = 2;
+									}
 								}
 							}
 
@@ -83,11 +88,12 @@ void ExternalInterface::doControlPanelComm(Synth *synth, int sndBufLength) {
 							*bufptr++ = (Bit16u)synth->getPartial(i)->getKey();
 
 							// Age uniquely identifies note instance
-							*(Bit32u *)bufptr = synth->getPartial(i)->age;
+//							*(Bit32u *)bufptr = synth->getPartial(i)->age;
+							*(Bit32u *)bufptr = 0;	// this is obsolete
 							bufptr++;
 							bufptr++;
 							if (synth->getPartial(i)->getPoly() != NULL) {
-								*bufptr++ = (Bit16u)synth->getPartial(i)->getPoly()->vel;
+								*bufptr++ = (Bit16u)synth->getPartial(i)->getPoly()->getVelocity();
 							} else {
 								*bufptr++ = 0;
 							}
@@ -104,7 +110,8 @@ void ExternalInterface::doControlPanelComm(Synth *synth, int sndBufLength) {
 						bufptr++;
 					}
 					for (i=0;i<9;i++) {
-						*bufptr++ = (Bit16u)synth->getPart(i)->getVolume();
+//						*bufptr++ = (Bit16u)synth->getPart(i)->getVolume();
+                        *bufptr++ = 0;	// this is obsolete
 					}
 					*(int *)bufptr = sndBufLength;
 
