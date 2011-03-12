@@ -15,7 +15,6 @@
  */
 
 #include <string.h>
-//#include <math.h>
 
 #include "mt32emu.h"
 
@@ -58,7 +57,9 @@ Part::Part(Synth *useSynth, unsigned int usePartNum) {
 	}
 	currentInstr[0] = 0;
 	currentInstr[10] = 0;
+	modulation = 0;
 	expression = 100;
+	pitchBend = 0;
 	activePartialCount = 0;
 	pitchBend = 0;
 	modulation = 0;
@@ -161,6 +162,7 @@ void RhythmPart::refresh() {
 			cache[t].reverb = rhythmTemp[drumNum].reverbSwitch > 0;
 		}
 	}
+	updatePitchBenderRange();
 }
 
 void Part::refresh() {
@@ -171,6 +173,7 @@ void Part::refresh() {
 		patchCache[t].reverb = patchTemp->patch.reverbSwitch > 0;
 	}
 	memcpy(currentInstr, timbreTemp->common.name, 10);
+	updatePitchBenderRange();
 }
 
 const char *Part::getCurrentInstr() const {
@@ -241,7 +244,6 @@ void RhythmPart::setProgram(unsigned int patchNum) {
 
 void Part::setProgram(unsigned int patchNum) {
 	setPatch(&synth->mt32ram.patches[patchNum]);
-	updatePitchBenderRange();
 	allSoundOff();
 	setTimbre(&synth->mt32ram.timbres[getAbsTimbreNum()].timbre);
 	refresh();
