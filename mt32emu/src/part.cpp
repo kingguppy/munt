@@ -61,8 +61,6 @@ Part::Part(Synth *useSynth, unsigned int usePartNum) {
 	expression = 100;
 	pitchBend = 0;
 	activePartialCount = 0;
-	pitchBend = 0;
-	modulation = 0;
 	memset(patchCache, 0, sizeof(patchCache));
 	for (int i = 0; i < MT32EMU_MAX_POLY; i++) {
 		freePolys.push_front(new Poly(this));
@@ -345,6 +343,10 @@ void Part::setVolume(unsigned int midiVolume) {
 	// CONFIRMED: This calculation matches the table used in the control ROM
 	patchTemp->outputLevel = (Bit8u)(midiVolume * 100 / 127);
 	//synth->printDebug("%s (%s): Set volume to %d", name, currentInstr, midiVolume);
+}
+
+Bit8u Part::getVolume() const {
+	return patchTemp->outputLevel;
 }
 
 Bit8u Part::getExpression() const {

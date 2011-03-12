@@ -69,27 +69,20 @@ void ExternalInterface::doControlPanelComm(Synth *synth, int sndBufLength) {
 							*bufptr++ = 0;
 							*bufptr++ = 0;
 						} else {
-							int phase = synth->getPartial(i)->tva->getPhase();
-							if (phase == 7) {
+							int tvaPhase = synth->getPartial(i)->tva->getPhase();
+							if (tvaPhase == TVA_PHASE_SUSTAIN)
+								*bufptr++ = 2;
+							else if (tvaPhase == TVA_PHASE_RELEASE)
+								*bufptr++ = 3;
+							else if (tvaPhase == TVA_PHASE_DEAD)
 								*bufptr++ = 0;
-							} else {
-								if (phase < 3) {
-									*bufptr++ = 1;
-								} else {
-									if (phase == 6) {
-										*bufptr++ = 3;
-									} else {
-										*bufptr++ = 2;
-									}
-								}
-							}
+							else
+								*bufptr++ = 1;
 
 							*bufptr++ = (Bit16u)synth->getPartial(i)->getOwnerPart();
 							*bufptr++ = (Bit16u)synth->getPartial(i)->getKey();
 
-							// Age uniquely identifies note instance
-//							*(Bit32u *)bufptr = synth->getPartial(i)->age;
-							*(Bit32u *)bufptr = 0;	// this is obsolete
+							*(Bit32u *)bufptr = 0; // Obsolete: Was partial age.
 							bufptr++;
 							bufptr++;
 							if (synth->getPartial(i)->getPoly() != NULL) {
@@ -110,8 +103,7 @@ void ExternalInterface::doControlPanelComm(Synth *synth, int sndBufLength) {
 						bufptr++;
 					}
 					for (i=0;i<9;i++) {
-//						*bufptr++ = (Bit16u)synth->getPart(i)->getVolume();
-                        *bufptr++ = 0;	// this is obsolete
+						*bufptr++ = (Bit16u)(synth->getPart(i)->getVolume() * 127 / 100);
 					}
 					*(int *)bufptr = sndBufLength;
 
