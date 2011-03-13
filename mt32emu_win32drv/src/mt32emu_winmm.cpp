@@ -27,7 +27,7 @@
 
 #include <initguid.h>
 #include <dmusics.h>
-#include <dmusici.h>
+#include "dmusici.h"
 #include <mmddk.h>
 #include <mmsystem.h>
 #include <mmreg.h>
@@ -322,7 +322,8 @@ LONG OpenDriver(Driver *driver, UINT uDeviceID, UINT uMsg, DWORD dwUser, DWORD d
 		WriteLog("Attempt to open more than the MAX_CLIENTS we arbitrarily support denied", uMsg);
 		return MMSYSERR_ALLOCATED;
 	} else {
-		for (int i = 0; i < MAX_CLIENTS; i++) {
+		int i;
+		for (i = 0; i < MAX_CLIENTS; i++) {
 			if (!driver->clients[i].allocated) {
 				break;
 			}
