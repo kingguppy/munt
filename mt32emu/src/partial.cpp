@@ -278,11 +278,17 @@ unsigned long Partial::generateSamples(Bit16s *partialBuf, unsigned long length)
 			float nyquist = __min(.5f * synth->myProp.sampleRate, FILTERGRAN);
 			if(freqsum > (nyquist - 500.0))
 				freqsum = (nyquist - 500.0f);
-			sample = (floorf((synth->iirFilter)((sample), &history[0], synth->tables.filtCoeff[(Bit32s)freqsum][(int)patchCache->filtEnv.resonance])));
+			
+			// we really don't want the filter to attenuate samples below cutoff 50
+			if(filtval < 128)
+				freqsum = freq;
 
-			// This amplifies signal fading near the cutoff point
+			sample = (floorf((synth->iirFilter)((sample), &history[0], 
+				synth->tables.filtCoeff[(Bit32s)freqsum][(int)patchCache->filtEnv.resonance])));
+
+			// instead, we attenuate samples below cutoff 50 another way
 			if (filtval < 128) {
-				sample *= .125f * (128 + 8 - filtval);
+				sample *= fpow2((filtval - 128) / 32);
 			}
 
 			// In case of overdriving prevent clicks
