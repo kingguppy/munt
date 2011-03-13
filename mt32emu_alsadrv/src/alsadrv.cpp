@@ -1,3 +1,21 @@
+/* Copyright (C) 2003 Tristan
+ * Copyright (C) 2004, 2005 Tristan, Jerome Fisher
+ * Copyright (C) 2008, 2011 Tristan, Jerome Fisher, Jörg Walter
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 2.1 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
@@ -85,7 +103,7 @@ int consumer_types = 0;
 snd_pcm_t *pcm_handle = NULL;
 snd_pcm_hw_params_t *pcm_hwparams;
 // char *pcm_name = "plughw:0,0";
-char *pcm_name = "default";
+const char *pcm_name = "default";
 
 
 /* midi queue control variables */
@@ -103,7 +121,7 @@ char rvsysex[] = {
 
 
 #ifdef DEBUG
-void debug_msg(char *msg, ...)
+void debug_msg(const char *msg, ...)
 {
 	va_list ap;
 	
@@ -112,7 +130,7 @@ void debug_msg(char *msg, ...)
 	va_end(ap);
 }
 #else
-void debug_msg(char *msg, ...)
+void debug_msg(const char *msg, ...)
 {
 	
 }
@@ -656,7 +674,7 @@ static inline int convert_to_mt(snd_seq_event_t *seq_ev)
 	return 0;
 }
 
-char *create_filename(char *base, char *ext)
+char *create_filename(const char *base, const char *ext)
 {
 	char fullname[128], *n;
 	struct stat buf;

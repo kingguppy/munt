@@ -1,3 +1,21 @@
+/* Copyright (C) 2003 Tristan
+ * Copyright (C) 2004, 2005 Tristan, Jerome Fisher
+ * Copyright (C) 2008, 2011 Tristan, Jerome Fisher, Jörg Walter
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 2.1 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,7 +58,7 @@ void create_pixmaps()
 	button_width = atr.width; button_height = atr.height;	
 }
 
-XFontStruct * load_font(char **fontlist)
+XFontStruct * load_font(const char **fontlist)
 {
 	XFontStruct *fs;
 	int i;
@@ -58,7 +76,7 @@ XFontStruct * load_font(char **fontlist)
 	return fs;
 }
 
-void get_string_dims(XFontStruct *fs, char *txt, int *_w, int *_h)
+void get_string_dims(XFontStruct *fs, const char *txt, int *_w, int *_h)
 {
 	unsigned char c;
 	int tl, w, h, nh, i;
@@ -92,7 +110,7 @@ void get_string_dims(XFontStruct *fs, char *txt, int *_w, int *_h)
 	*_h = h;
 }
 
-char *button_fonts[] =
+const char *button_fonts[] =
 {
 	"-*-helvetica-medium-r-*--10-*",
 		"-*-fixed-medium-r-*--10-*",
@@ -102,7 +120,7 @@ char *button_fonts[] =
 };
 
 
-Pixmap create_button(char *txt)
+Pixmap create_button(const char *txt)
 {
 	Pixmap p;
 	int tl, x, y, w, h;
