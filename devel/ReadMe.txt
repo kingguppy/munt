@@ -35,3 +35,18 @@ Filtered square wave generation using a wavetable for various cutoff points
 + wavetable can be filled with waveforms which exactly correspond to real hardware output either sampled or generated via slow and exact algorithms (e.g. window-sinc filter)
 + there is a way for producing sound for parameter values in-between neighbor indexes by mixing corresponding waves at proportional volumes (or any other interpolation method can be used)
 - aliasing introduced when playing wave samples large enough at highest pitches, for producing superior sound quality it�s necessary either sound decimation or adding wavetables for several octaves
+
+
+WTRSynth:
+---------
+
+Filtered squarewave generation using cosine waves on slopes
+Waves produced are very similar to Casio's phase distortion but in another way
+
++ can surely be implemented in hardware using cosine LUT for speedup computations
++ LUT is the only memory needed for WG
++ waves produced are perfect and unique
++ this makes mindful use of the cosine LUT to form sawtooth waves
+- can be claimed as Casio's patent violation when implemented in a electronic musical instrument
+- to be checked for consistency in terms of accordance of waveform shape to filterval values
+- for now, resonance emulation isn't functional since there are too many "How to?"s
