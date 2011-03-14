@@ -8,7 +8,7 @@ using namespace MT32Emu;
 
 static const unsigned int SAMPLE_RATE = 32000;
 static const float TS_TO_SAMPLES = SAMPLE_RATE / 1000.f;
-static const unsigned int len = 80 * UINT(SAMPLE_RATE / 1000.f);
+static const unsigned int len = 90 * UINT(SAMPLE_RATE / 1000.f);
 
 DWORD BufferStartTS, BufferStartS;
 DWORD playCursor;
@@ -158,7 +158,11 @@ int MT32_Report(void *userData, MT32Emu::ReportType type, const void *reportData
 	return 0;
 }
 
+#if MT32EMU_USE_EXTINT == 1
 extern "C" int SDL_main(int argc, char *argv[]) {
+#else
+int main() {
+#endif
 	static MidiStream midiStream;
 	static Bit16s stream1[2 * len];
 	static Bit16s stream2[2 * len];
@@ -268,7 +272,10 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 		delete mt32emuExtInt;
 	}
 #endif
+	midiInUnprepareHeader(hMidiIn, &MidiInHdr, sizeof(MIDIHDR));
+	midiInClose(hMidiIn);
 	waveOutUnprepareHeader(hWaveOut, &WaveHdr1, sizeof(WAVEHDR));
 	waveOutUnprepareHeader(hWaveOut, &WaveHdr2, sizeof(WAVEHDR));
 	waveOutClose(hWaveOut);
+	return wResult;
 }
