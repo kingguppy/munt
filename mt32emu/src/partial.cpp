@@ -246,6 +246,12 @@ unsigned long Partial::generateSamples(Bit16s *partialBuf, unsigned long length)
 			float SynthPulseDelta = SynthDelta * (1.f - .0093f * pulsewidth);
 			if ((patchCache->waveform & 1) != 0) {
 				//Sawtooth samples
+
+				// Correction for the lowered pitch
+				freq *= 2.f;
+				SynthDelta *= .5f;
+				SynthPulseDelta *= .5f;
+
 				if ((SynthPulseDelta - SynthPulseCounter) >= 1.f) {
 					sample = float(2 * WGAMP) * SynthPulseCounter / SynthPulseDelta - float(WGAMP);
 				} else if ((SynthPulseDelta - SynthPulseCounter) > 0.f) {
