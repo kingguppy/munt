@@ -88,7 +88,7 @@ static Bit32u calcBasePitch(const Partial *partial, const TimbreParam::PartialPa
 		} else {
 			// Sawtooth waves are effectively double the frequency of square waves.
 			// Thus we add 4096 less than for square waves here, which results in halving the frequency.
-			basePitch += 37133; // 33037;
+			basePitch += 33037;
 		}
 	}
 	if (basePitch < 0) {
