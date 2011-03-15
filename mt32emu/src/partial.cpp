@@ -243,48 +243,45 @@ unsigned long Partial::generateSamples(Bit16s *partialBuf, unsigned long length)
 		} else {
 			// Render synthesised waveform
 //	 blit code replaced with a fast band-limited synth
-			float SynthDelta = synth->myProp.sampleRate * synth->tables.tPitch2RFreq[pitch];
-			float SynthPulseDelta = SynthDelta * (1.f - .0093f * pulsewidth);
+			float wavePeriod = synth->myProp.sampleRate * synth->tables.tPitch2RFreq[pitch];
+
+			// according to D-50 UG PW = 0 => 50% and PW = 100 => 97%
+			float pulseLen = wavePeriod * (.5f - .0047f * pulsewidth);
 			if ((patchCache->waveform & 1) != 0) {
 				//Sawtooth samples
-
-				// Correction for the lowered pitch
-				freq *= 2.f;
-				SynthDelta *= .5f;
-				SynthPulseDelta *= .5f;
-
-				if ((SynthPulseDelta - SynthPulseCounter) >= 1.f) {
-					sample = float(2 * WGAMP) * SynthPulseCounter / SynthPulseDelta - float(WGAMP);
-				} else if ((SynthPulseDelta - SynthPulseCounter) > 0.f) {
-					sample = float(2 * WGAMP) * (SynthPulseDelta - SynthPulseCounter) - float(WGAMP);
+				if ((pulseLen - SynthPulseCounter) >= 1.f) {
+					sample = float(2 * WGAMP) * SynthPulseCounter / pulseLen - float(WGAMP);
+				} else if ((pulseLen - SynthPulseCounter) > 0.f) {
+					sample = float(2 * WGAMP) * (pulseLen - SynthPulseCounter) - float(WGAMP);
+				} else if ((wavePeriod - SynthPulseCounter) >= 1.f) {
+					sample = float(2 * WGAMP) * (SynthPulseCounter - pulseLen) / (wavePeriod - pulseLen) - float(WGAMP);
 				} else {
-					sample = -float(WGAMP);
+					sample = float(2 * WGAMP) * (wavePeriod - SynthPulseCounter) - float(WGAMP);
 				}
 			} else {
 				//Square wave.
-				SynthPulseDelta *= .5f;
-				if ((SynthPulseDelta - SynthPulseCounter) >= 1.f) {
+				if ((pulseLen - SynthPulseCounter) >= 1.f) {
 					sample = -float(WGAMP);
-				} else if ((SynthPulseDelta - SynthPulseCounter) > 0.f) {
-					sample = float(2 * WGAMP) * (1.f + SynthPulseCounter - SynthPulseDelta) - float(WGAMP);
-				} else if ((SynthDelta - SynthPulseCounter) >= 1.f) {
+				} else if ((pulseLen - SynthPulseCounter) > 0.f) {
+					sample = float(2 * WGAMP) * (1.f + SynthPulseCounter - pulseLen) - float(WGAMP);
+				} else if ((wavePeriod - SynthPulseCounter) >= 1.f) {
 					sample = float(WGAMP);
 				} else {
-					sample = float(2 * WGAMP) * (SynthDelta - SynthPulseCounter) - float(WGAMP);
+					sample = float(2 * WGAMP) * (wavePeriod - SynthPulseCounter) - float(WGAMP);
 				}
 			}
 			SynthPulseCounter++;
-			if (SynthPulseCounter > SynthDelta) {
-				SynthPulseCounter -= SynthDelta;
+			if (SynthPulseCounter > wavePeriod) {
+				SynthPulseCounter -= wavePeriod;
 			}
 
 			Bit32s filtval = getFiltEnvelope();
 			float freqsum = synth->tables.tCutoffFreq[filtval] * freq;
 
 			// limit filter freq by Nyquist frequency to avoid aliasing
-			float nyquist = __min(.5f * synth->myProp.sampleRate, FILTERGRAN);
-			if(freqsum > (nyquist - 500.0))
-				freqsum = (nyquist - 500.0f);
+			float filtergran = __min(.5f * synth->myProp.sampleRate, FILTERGRAN) - 500.0;
+			if(freqsum > filtergran)
+				freqsum = filtergran;
 			
 			// we really don't want the filter to attenuate samples below cutoff 50
 			if(filtval < 128)
