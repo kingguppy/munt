@@ -41,7 +41,6 @@ public:
 	float next();
 	bool isEmpty();
 	void mute();
-	virtual float process(float in) = 0;
 };
 
 class AllpassFilter : public RingBuffer {
