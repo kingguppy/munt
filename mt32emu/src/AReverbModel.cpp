@@ -118,14 +118,7 @@ float Delay::process(float in) {
 	return out;
 }
 
-AReverbModel::AReverbModel(const AReverbSettings *newSettings) {
-	currentSettings = newSettings;
-	for (Bit32u i = 0; i < NUM_ALLPASSES; i++) {
-		allpasses[i] = NULL;
-	}
-	for (Bit32u i = 0; i < NUM_DELAYS; i++) {
-		delays[i] = NULL;
-	}
+AReverbModel::AReverbModel(const AReverbSettings *useSettings) : allpasses(NULL), delays(NULL), currentSettings(useSettings) {
 }
 
 AReverbModel::~AReverbModel() {
