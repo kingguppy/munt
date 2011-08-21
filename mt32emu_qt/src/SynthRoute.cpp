@@ -20,10 +20,7 @@
  *  - Initial setup
  *  - Sample rate changes
  *  - Pausing/unpausing when the QSynth becomes unavailable.
- * - Maintaining a list of MIDI input drivers (and in future outputs) for the synth
- * - Synchronising timestamps between (potentially multiple) MIDI inputs and a single audio output
- *  - Giving Synth the correct monotonically increasing timestamp for MIDI messages
- *  - Giving Synth the correct timestamp for the first sample in render() calls
+ * - Maintaining a list of MIDI sessions for the synth
  */
 
 #include "SynthRoute.h"
@@ -31,9 +28,14 @@
 #ifdef WIN32
 	#define USE_WINMM_AUDIO_DRIVER
 	#include "audiodrv/WinMMAudioDriver.h"
+#elif defined(USE_ALSA_AUDIO_DRIVER)
+	#include "audiodrv/AlsaAudioDriver.h"
+#elif defined(USE_PULSE_AUDIO_DRIVER)
+	#include "audiodrv/PulseAudioDriver.h"
+#else
+	#include "audiodrv/PortAudioDriver.h"
 #endif
 
-#include "audiodrv/PortAudioDriver.h"
 
 using namespace MT32Emu;
 
@@ -46,18 +48,19 @@ static const int SAMPLE_RATE = 32000;
 // for a while when first starting.
 static const qint64 EMERGENCY_RESYNC_THRESHOLD_NANOS = 500000000;
 
-SynthRoute::SynthRoute(QObject *parent) : QObject(parent), state(SynthRouteState_CLOSED), qSynth(this), audioDeviceIndex(0), refNanosOffsetValid(false), refNanosOffset(0), audioDriver(NULL) {
+SynthRoute::SynthRoute(QObject *parent) : QObject(parent), state(SynthRouteState_CLOSED), qSynth(this), audioDevice(NULL), audioStream(NULL) {
 	sampleRate = SAMPLE_RATE;
 
 	connect(&qSynth, SIGNAL(stateChanged(SynthState)), SLOT(handleQSynthState(SynthState)));
 }
 
 SynthRoute::~SynthRoute() {
-	delete audioDriver;
+	delete audioStream;
 }
 
-void SynthRoute::setAudioDeviceIndex(int newAudioDeviceIndex) {
-	audioDeviceIndex = newAudioDeviceIndex;
+void SynthRoute::setAudioDevice(AudioDevice *newAudioDevice) {
+	audioDevice = newAudioDevice;
+	close();
 }
 
 void SynthRoute::setState(SynthRouteState newState) {
@@ -78,16 +81,10 @@ bool SynthRoute::open() {
 	default:
 		break;
 	}
-	if (audioDriver == NULL) {
-#ifdef USE_WINMM_AUDIO_DRIVER
-		audioDriver = new WinMMAudioDriver(&qSynth, sampleRate);
-#else
-		audioDriver = new PortAudioDriver(&qSynth, sampleRate);
-#endif
-	}
 	setState(SynthRouteState_OPENING);
 	if (qSynth.open()) {
-		if (audioDriver->start(audioDeviceIndex)) {
+		audioStream = audioDevice->startAudioStream(&qSynth, sampleRate);
+		if(audioStream != NULL) {
 			setState(SynthRouteState_OPEN);
 			return true;
 		}
@@ -107,7 +104,8 @@ bool SynthRoute::close() {
 		break;
 	}
 	setState(SynthRouteState_CLOSING);
-	audioDriver->close();
+	delete audioStream;
+	audioStream = NULL;
 	qSynth.close();
 	return true;
 }
@@ -141,10 +139,11 @@ void SynthRoute::handleQSynthState(SynthState synthState) {
 	case SynthState_OPEN:
 		break;
 	case SynthState_CLOSING:
-		//audioDriver->suspend();
+		//audioStream->suspend();
 		break;
 	case SynthState_CLOSED:
-		audioDriver->close();
+		delete audioStream;
+		audioStream = NULL;
 		setState(SynthRouteState_CLOSED);
 		break;
 	}

@@ -16,8 +16,6 @@
 
 #include "AudioDriver.h"
 
-QList<QString> AudioDriver::getDeviceNames() {
-	QList<QString> deviceNames;
-	deviceNames << "Moo";
-	return deviceNames;
+AudioDevice::AudioDevice(AudioDriver *useDriver, QString useName) : driver(useDriver), name(useName) {
+
 }
